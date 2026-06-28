@@ -52,7 +52,7 @@ export default function QuizPage() {
   const type = questionTypes[current] ?? 'choice'
   const options = useMemo(
     () => type === 'choice' && currentWord ? shuffle([...getDistractors(currentWord, 3, allWords), currentWord]) : [],
-    [current, allWords.length]  // eslint-disable-line react-hooks/exhaustive-deps
+    [current, currentWord?.id, allWords.length]  // eslint-disable-line react-hooks/exhaustive-deps
   )
 
   useEffect(() => {
