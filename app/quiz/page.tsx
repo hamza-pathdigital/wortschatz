@@ -40,6 +40,14 @@ export default function QuizPage() {
   const [checked, setChecked] = useState(false)
   const [done, setDone] = useState(false)
 
+  // Must be before any early return to satisfy rules of hooks
+  const currentWord = questions[current]
+  const type = questionTypes[current] ?? 'choice'
+  const options = useMemo(
+    () => type === 'choice' && currentWord ? shuffle([...getDistractors(currentWord, 3, allWords), currentWord]) : [],
+    [current, allWords.length]  // eslint-disable-line react-hooks/exhaustive-deps
+  )
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') router.push('/')
@@ -128,14 +136,6 @@ export default function QuizPage() {
       </main>
     )
   }
-
-  const currentWord = questions[current]
-  const type = questionTypes[current]
-
-  const options = useMemo(
-    () => type === 'choice' ? shuffle([...getDistractors(currentWord, 3, allWords), currentWord]) : [],
-    [current, allWords.length]  // eslint-disable-line react-hooks/exhaustive-deps
-  )
 
   return (
     <main className="max-w-content mx-auto px-6 py-12 space-y-8">
