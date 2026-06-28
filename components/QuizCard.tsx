@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Word } from '@/lib/vocab'
+import ArticleWord from '@/components/ArticleWord'
 
 interface QuizCardProps {
   word: Word
@@ -56,12 +57,14 @@ export default function QuizCard({ word, type, options, onResult }: QuizCardProp
           <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">
             What does this mean?
           </p>
-          <p className="font-mono text-[32px] font-light text-primary">{word.german}</p>
+          <ArticleWord german={word.german} article={word.article} className="font-mono text-[32px] font-light text-primary block" />
           <div className="space-y-2">
-            {options.map(opt => (
+            {options.map((opt, i) => (
               <button
                 key={opt.id}
+                data-option
                 onClick={() => !checked && setSelected(opt.english)}
+                title={`Press ${i + 1}`}
                 className={`w-full min-h-[44px] px-4 py-2 text-left border text-[16px] transition-colors duration-200 ${
                   checked && opt.english === word.english
                     ? 'border-correct text-correct'
@@ -86,6 +89,7 @@ export default function QuizCard({ word, type, options, onResult }: QuizCardProp
       {!checked && (
         <div className="flex justify-end">
           <button
+            data-primary
             onClick={handleCheck}
             disabled={type === 'fill' ? !input.trim() : !selected}
             className="min-h-[44px] px-6 border border-primary text-[13px] font-medium uppercase tracking-[0.1em] hover:bg-highlight transition-colors duration-200 disabled:border-border disabled:text-muted disabled:cursor-not-allowed"

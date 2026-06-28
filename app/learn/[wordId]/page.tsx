@@ -9,11 +9,13 @@ import {
   setMastered,
   getDistractors,
   getPracticeType,
+  recordWordLearned,
   type Word,
 } from '@/lib/vocab'
 import StageIndicator from '@/components/StageIndicator'
 import PronounceButton from '@/components/PronounceButton'
 import WordCard from '@/components/WordCard'
+import ArticleWord from '@/components/ArticleWord'
 
 type Stage = 1 | 2 | 3 | 4
 type Outcome = 'correct' | 'wrong' | null
@@ -36,7 +38,13 @@ export default function LearnPage() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') router.push('/')
+      if (e.key === 'Escape') { router.push('/'); return }
+      if (e.key === 'Enter' && e.target === document.body) {
+        // Enter advances through stages when not in a text input
+        const btn =
+          document.querySelector<HTMLButtonElement>('button[data-advance]')
+        btn?.click()
+      }
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
@@ -71,7 +79,7 @@ export default function LearnPage() {
       correct = selectedOption === word.english
     }
     setOutcome(correct ? 'correct' : 'wrong')
-    if (correct) setMastered(word.id, true)
+    if (correct) { setMastered(word.id, true); recordWordLearned() }
   }
 
   const motionProps = prefersReduced
@@ -105,9 +113,7 @@ export default function LearnPage() {
               <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">
                 {word.category}
               </p>
-              <h2 className="font-mono text-[56px] font-light tracking-[-0.02em] leading-none">
-                {word.german}
-              </h2>
+              <ArticleWord german={word.german} article={word.article} className="font-mono text-[56px] font-light tracking-[-0.02em] leading-none block" />
               <p className="text-[32px] font-light text-muted">{word.english}</p>
               <WordCard stage={1}>
                 <p className="italic text-[15px] text-primary">{word.exampleSentence}</p>
@@ -115,10 +121,10 @@ export default function LearnPage() {
               </WordCard>
               <div className="flex justify-end">
                 <button
-                  onClick={advance}
+                  onClick={advance} data-advance
                   className="min-h-[44px] px-6 border border-primary text-[13px] font-medium uppercase tracking-[0.1em] hover:bg-highlight transition-colors duration-200"
                 >
-                  Got it →
+                  Got it → <span className="text-[10px] opacity-40 ml-1">↵</span>
                 </button>
               </div>
             </div>
@@ -126,15 +132,13 @@ export default function LearnPage() {
 
           {stage === 2 && (
             <div className="space-y-6">
-              <h2 className="font-mono text-[56px] font-light tracking-[-0.02em] leading-none">
-                {word.german}
-              </h2>
+              <ArticleWord german={word.german} article={word.article} className="font-mono text-[56px] font-light tracking-[-0.02em] leading-none block" />
               <p className="font-mono text-[20px] tracking-widest text-muted">
                 / {word.phonetic} /
               </p>
               <PronounceButton word={word.german} onPlayed={() => setHasListened(true)} />
               <button
-                onClick={advance}
+                onClick={advance} data-advance
                 className="min-h-[44px] w-full border border-primary text-[13px] font-medium uppercase tracking-[0.1em] hover:bg-highlight transition-colors duration-200"
               >
                 Next →
@@ -144,9 +148,7 @@ export default function LearnPage() {
 
           {stage === 3 && (
             <div className="space-y-6">
-              <h2 className="font-mono text-[56px] font-light tracking-[-0.02em] leading-none">
-                {word.german}
-              </h2>
+              <ArticleWord german={word.german} article={word.article} className="font-mono text-[56px] font-light tracking-[-0.02em] leading-none block" />
               <WordCard stage={3}>
                 <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted mb-3">
                   → Remember it like this
@@ -157,7 +159,7 @@ export default function LearnPage() {
               </WordCard>
               <div className="flex justify-end">
                 <button
-                  onClick={advance}
+                  onClick={advance} data-advance
                   className="min-h-[44px] px-6 border border-primary text-[13px] font-medium uppercase tracking-[0.1em] hover:bg-highlight transition-colors duration-200"
                 >
                   I&apos;ll remember

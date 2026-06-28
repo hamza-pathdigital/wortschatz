@@ -2,16 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { getAllWords, getWordsBase, getCategories, type Word } from '@/lib/vocab'
+import { getAllWords, getWordsBase, getCategories, setMastered, getStreak, getDailyCount, DAILY_GOAL, type Word } from '@/lib/vocab'
 import ProgressBar from '@/components/ProgressBar'
+import ArticleWord from '@/components/ArticleWord'
 
 export default function Home() {
   const [words, setWords] = useState<Word[]>(getWordsBase)
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [masteredOpen, setMasteredOpen] = useState(true)
+  const [streak, setStreak] = useState(0)
+  const [dailyCount, setDailyCount] = useState(0)
 
   useEffect(() => {
     setWords(getAllWords())
+    setStreak(getStreak().count)
+    setDailyCount(getDailyCount())
   }, [])
 
   const categories = ['all', ...getCategories()]
@@ -47,6 +52,25 @@ export default function Home() {
       </div>
 
       <div className="my-6 h-px bg-border" />
+
+      {(streak > 0 || dailyCount > 0) && (
+        <div className="flex items-center gap-6 mb-6 text-[13px] text-muted">
+          {streak > 0 && (
+            <span>{streak} day streak</span>
+          )}
+          <span className="flex items-center gap-2">
+            <span>{dailyCount}/{DAILY_GOAL} today</span>
+            <span className="flex gap-0.5">
+              {Array.from({ length: DAILY_GOAL }, (_, i) => (
+                <span
+                  key={i}
+                  className={`w-2 h-2 rounded-full ${i < dailyCount ? 'bg-correct' : 'bg-border'}`}
+                />
+              ))}
+            </span>
+          </span>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2 mb-6">
         {categories.map(cat => (
@@ -88,17 +112,20 @@ export default function Home() {
           {masteredOpen && (
             <ul className="divide-y divide-border border border-border">
               {masteredWords.map(word => (
-                <li key={word.id}>
+                <li key={word.id} className="flex items-center justify-between px-4 hover:bg-highlight transition-colors duration-200">
                   <Link
                     href={`/learn/${word.id}`}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-highlight transition-colors duration-200"
+                    className="flex items-center justify-between py-3 flex-1 gap-3"
                   >
-                    <span className="font-mono text-primary">{word.german}</span>
-                    <span className="flex items-center gap-3 text-muted">
-                      <span className="text-sm">{word.english}</span>
-                      <span className="text-[11px] font-medium text-correct">✓</span>
-                    </span>
+                    <ArticleWord german={word.german} article={word.article} className="font-mono text-primary" />
+                    <span className="text-sm text-muted">{word.english}</span>
                   </Link>
+                  <button
+                    onClick={() => { setMastered(word.id, false); setWords(getAllWords()) }}
+                    className="ml-4 text-[11px] text-muted hover:text-wrong transition-colors duration-200 min-h-[44px] px-1"
+                  >
+                    Forgot
+                  </button>
                 </li>
               ))}
             </ul>

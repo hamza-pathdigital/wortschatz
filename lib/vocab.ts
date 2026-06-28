@@ -94,3 +94,50 @@ export function getPracticeType(id: string): 'fill' | 'choice' {
 export function getWordsBase(): Word[] {
   return (rawWords as Word[]).map(w => ({ ...w, mastered: false }))
 }
+
+const STREAK_KEY = 'wortschatz:streak'
+const DAILY_KEY = 'wortschatz:daily'
+
+interface StreakData { count: number; lastDate: string }
+interface DailyData { date: string; count: number }
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export function getStreak(): StreakData {
+  if (typeof window === 'undefined') return { count: 0, lastDate: '' }
+  try {
+    const raw = localStorage.getItem(STREAK_KEY)
+    return raw ? JSON.parse(raw) : { count: 0, lastDate: '' }
+  } catch { return { count: 0, lastDate: '' } }
+}
+
+export function getDailyCount(): number {
+  if (typeof window === 'undefined') return 0
+  try {
+    const raw = localStorage.getItem(DAILY_KEY)
+    if (!raw) return 0
+    const data: DailyData = JSON.parse(raw)
+    return data.date === todayStr() ? data.count : 0
+  } catch { return 0 }
+}
+
+export function recordWordLearned(): void {
+  if (typeof window === 'undefined') return
+  const today = todayStr()
+
+  // Update daily count
+  const daily: DailyData = { date: today, count: getDailyCount() + 1 }
+  localStorage.setItem(DAILY_KEY, JSON.stringify(daily))
+
+  // Update streak
+  const streak = getStreak()
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+  let newCount = 1
+  if (streak.lastDate === today) newCount = streak.count
+  else if (streak.lastDate === yesterday) newCount = streak.count + 1
+  localStorage.setItem(STREAK_KEY, JSON.stringify({ count: newCount, lastDate: today }))
+}
+
+export const DAILY_GOAL = 5

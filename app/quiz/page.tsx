@@ -57,7 +57,17 @@ export default function QuizPage() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') router.push('/')
+      if (e.key === 'Escape') { router.push('/'); return }
+      // 1-4 select multiple choice options
+      if (['1','2','3','4'].includes(e.key)) {
+        const btns = document.querySelectorAll<HTMLButtonElement>('button[data-option]')
+        btns[parseInt(e.key) - 1]?.click()
+      }
+      // Enter clicks the primary action button (Check / Next)
+      if (e.key === 'Enter') {
+        const btn = document.querySelector<HTMLButtonElement>('button[data-primary]')
+        btn?.click()
+      }
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
@@ -170,6 +180,7 @@ export default function QuizPage() {
 
       {checked && (
         <button
+          data-primary
           onClick={handleAdvance}
           className="min-h-[44px] w-full border border-primary text-[13px] font-medium uppercase tracking-[0.1em] hover:bg-highlight transition-colors duration-200"
         >
