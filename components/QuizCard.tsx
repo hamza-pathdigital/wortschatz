@@ -79,7 +79,7 @@ export default function QuizCard({ word, type, options, onResult }: QuizCardProp
 
       {checked && (
         <p className={`text-[13px] font-medium uppercase tracking-[0.1em] ${isCorrect ? 'text-correct' : 'text-wrong'}`}>
-          {isCorrect ? '✓ Correct' : `✗ Answer: ${word.german}`}
+          {isCorrect ? '✓ Correct' : `✗ Answer: ${word.german || word.base}`}
         </p>
       )}
 

@@ -65,7 +65,8 @@ export default function LearnPage() {
   const handleCheck = () => {
     let correct = false
     if (practiceType === 'fill') {
-      correct = userInput.trim().toLowerCase() === word.base.toLowerCase()
+      const input = userInput.trim().toLowerCase()
+      correct = input === word.base.toLowerCase() || input === word.german.toLowerCase()
     } else {
       correct = selectedOption === word.english
     }
@@ -212,7 +213,7 @@ export default function LearnPage() {
                 <div className={`text-[13px] font-medium uppercase tracking-[0.1em] ${
                   outcome === 'correct' ? 'text-correct' : 'text-wrong'
                 }`}>
-                  {outcome === 'correct' ? '✓ Correct' : `✗ Correct answer: ${word.base}`}
+                  {outcome === 'correct' ? '✓ Correct' : `✗ Correct answer: ${word.german || word.base}`}
                 </div>
               )}
 
